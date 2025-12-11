@@ -760,6 +760,7 @@ InstallExtension() {
           # remove old components
           sed -i "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$3';""~~g" "resources/scripts/blueprint/components"/"$2"
           sed -i "s~""<${identifier^}Component />""~~g" "resources/scripts/blueprint/components"/"$2"
+          sed -i "s~""<${identifier^}Component arg={arg} />""~~g" "resources/scripts/blueprint/components"/"$2"
         fi
         if [[ ! $1 == "" ]]; then
 
@@ -787,6 +788,7 @@ InstallExtension() {
           sed -i \
             -e "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~~g" \
             -e "s~""<${identifier^}Component />""~~g" \
+            -e "s~""<${identifier^}Component arg={arg} />""~~g" \
             \
             -e "s~""\/\* blueprint\/import \*\/""~""\/\* blueprint\/import \*\/import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~g" \
             -e "s~""{/\* blueprint\/react \*/}""~""{/\* blueprint\/react \*/}\<${identifier^}Component /\>""~g" \
@@ -839,10 +841,11 @@ InstallExtension() {
           # Purge and add components.
           sed -i \
             -e "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~~g" \
+            -e "s~""<${identifier^}Component />""~~g" \
             -e "s~""<${identifier^}Component arg={arg} />""~~g" \
             \
             -e "s~""\/\* blueprint\/import \*\/""~""\/\* blueprint\/import \*\/import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~g" \
-            -e "s~""{/\* blueprint\/react \*/}""~""{/\* blueprint\/react \*/}\<${identifier^}Component /\>""~g" \
+            -e "s~""{/\* blueprint\/react \*/}""~""{/\* blueprint\/react \*/}\<${identifier^}Component arg={arg} /\>""~g" \
             "resources/scripts/blueprint/components"/"$2"
         fi
       }
