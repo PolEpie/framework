@@ -165,6 +165,7 @@ RemoveExtension() {
         sed -i \
           -e "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~~g" \
           -e "s~""<${identifier^}Component />""~~g" \
+          -e "s~""<${identifier^}Component arg={arg} />""~~g" \
           "resources/scripts/blueprint/components"/"$2"
       fi
     }
@@ -174,6 +175,7 @@ RemoveExtension() {
         # remove components
         sed -i \
           -e "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~~g" \
+          -e "s~""<${identifier^}Component />""~~g" \
           -e "s~""<${identifier^}Component arg={arg} />""~~g" \
           "resources/scripts/blueprint/components"/"$2"
       fi
