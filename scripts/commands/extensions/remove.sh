@@ -169,6 +169,16 @@ RemoveExtension() {
       fi
     }
 
+    REMOVE_REACT_WITH_ARG() {
+      if [[ ! $1 == "" ]]; then
+        # remove components
+        sed -i \
+          -e "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~~g" \
+          -e "s~""<${identifier^}Component arg={arg} />""~~g" \
+          "resources/scripts/blueprint/components"/"$2"
+      fi
+    }
+
     # Backwards compatibility
     if [ -n "$Components_Dashboard_BeforeContent" ]; then Components_Dashboard_Serverlist_BeforeContent="$Components_Dashboard_BeforeContent"; fi
     if [ -n "$Components_Dashboard_AfterContent" ]; then Components_Dashboard_Serverlist_AfterContent="$Components_Dashboard_AfterContent"; fi
@@ -202,7 +212,7 @@ RemoveExtension() {
     REMOVE_REACT "$Components_Dashboard_Serverlist_ServerRow_AfterEntryName" "Dashboard/Serverlist/ServerRow/AfterEntryName.tsx"
     REMOVE_REACT "$Components_Dashboard_Serverlist_ServerRow_BeforeEntryDescription" "Dashboard/Serverlist/ServerRow/BeforeEntryDescription.tsx"
     REMOVE_REACT "$Components_Dashboard_Serverlist_ServerRow_AfterEntryDescription" "Dashboard/Serverlist/ServerRow/AfterEntryDescription.tsx"
-    REMOVE_REACT "$Components_Dashboard_Serverlist_ServerRow_ResourceLimits" "Dashboard/Serverlist/ServerRow/ResourceLimits.tsx"
+    REMOVE_REACT_WITH_ARG "$Components_Dashboard_Serverlist_ServerRow_ResourceLimits" "Dashboard/Serverlist/ServerRow/ResourceLimits.tsx"
 
     # authentication
     REMOVE_REACT "$Components_Authentication_Container_BeforeContent" "Authentication/Container/BeforeContent.tsx"

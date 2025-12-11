@@ -793,6 +793,59 @@ InstallExtension() {
             "resources/scripts/blueprint/components"/"$2"
         fi
       }
+      
+      PLACE_REACT_WITH_ARG() {
+        if [[
+          ( $1 == "/"* ) ||
+          ( $1 == *"/.."* ) ||
+          ( $1 == *"../"* ) ||
+          ( $1 == *"/../"* ) ||
+          ( $1 == *"\n"* ) ||
+          ( $1 == *"@"* ) ||
+          ( $1 == *"\\"* )
+        ]]; then
+          clear_tmp
+          PRINT FATAL "Component file paths cannot escape the components folder."
+          return 1
+        fi
+
+        if [[ $3 != "$1" ]]; then
+          # remove old components
+          sed -i "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$3';""~~g" "resources/scripts/blueprint/components"/"$2"
+          sed -i "s~""<${identifier^}Component arg={arg} />""~~g" "resources/scripts/blueprint/components"/"$2"
+        fi
+        if [[ ! $1 == "" ]]; then
+
+          # validate file name
+          if [[ ${1} == *".tsx" ]] ||
+            [[ ${1} == *".ts"   ]] ||
+            [[ ${1} == *".jsx"  ]] ||
+            [[ ${1} == *".js"   ]]; then
+            clear_tmp
+            PRINT FATAL "Component paths may not end with a file extension."
+            return 1
+          fi
+
+          # validate path
+          if [[ ! -f ".blueprint/tmp/$n/$dashboard_components/${1}.tsx" ]] &&
+            [[ ! -f ".blueprint/tmp/$n/$dashboard_components/${1}.ts"   ]] &&
+            [[ ! -f ".blueprint/tmp/$n/$dashboard_components/${1}.jsx"  ]] &&
+            [[ ! -f ".blueprint/tmp/$n/$dashboard_components/${1}.js"   ]]; then
+            clear_tmp
+            PRINT FATAL "Components configuration points towards one or more files that do not exist."
+            return 1
+          fi
+
+          # Purge and add components.
+          sed -i \
+            -e "s~""import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~~g" \
+            -e "s~""<${identifier^}Component arg={arg} />""~~g" \
+            \
+            -e "s~""\/\* blueprint\/import \*\/""~""\/\* blueprint\/import \*\/import ${identifier^}Component from '@blueprint/extensions/${identifier}/$1';""~g" \
+            -e "s~""{/\* blueprint\/react \*/}""~""{/\* blueprint\/react \*/}\<${identifier^}Component /\>""~g" \
+            "resources/scripts/blueprint/components"/"$2"
+        fi
+      }
 
       # Backwards compatibility
       if [ -n "$Components_Dashboard_BeforeContent" ]; then Components_Dashboard_Serverlist_BeforeContent="$Components_Dashboard_BeforeContent"; fi
@@ -839,7 +892,7 @@ InstallExtension() {
       PLACE_REACT "$Components_Dashboard_Serverlist_ServerRow_AfterEntryName" "Dashboard/Serverlist/ServerRow/AfterEntryName.tsx" "$OldComponents_Dashboard_Serverlist_ServerRow_AfterEntryName"
       PLACE_REACT "$Components_Dashboard_Serverlist_ServerRow_BeforeEntryDescription" "Dashboard/Serverlist/ServerRow/BeforeEntryDescription.tsx" "$OldComponents_Dashboard_Serverlist_ServerRow_BeforeEntryDescription"
       PLACE_REACT "$Components_Dashboard_Serverlist_ServerRow_AfterEntryDescription" "Dashboard/Serverlist/ServerRow/AfterEntryDescription.tsx" "$OldComponents_Dashboard_Serverlist_ServerRow_AfterEntryDescription"
-      PLACE_REACT "$Components_Dashboard_Serverlist_ServerRow_ResourceLimits" "Dashboard/Serverlist/ServerRow/ResourceLimits.tsx" "$OldComponents_Dashboard_Serverlist_ServerRow_ResourceLimits"
+      PLACE_REACT_WITH_ARG "$Components_Dashboard_Serverlist_ServerRow_ResourceLimits" "Dashboard/Serverlist/ServerRow/ResourceLimits.tsx" "$OldComponents_Dashboard_Serverlist_ServerRow_ResourceLimits"
 
       # authentication
       PLACE_REACT "$Components_Authentication_Container_BeforeContent" "Authentication/Container/BeforeContent.tsx" "$OldComponents_Authentication_Container_BeforeContent"
