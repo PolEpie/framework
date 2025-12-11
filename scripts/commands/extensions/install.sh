@@ -1088,26 +1088,14 @@ InstallExtension() {
         sed -i "s~/\* \[routes] \*/~~g" "$AccountRouteConstructor"
         sed -i "s~/\* \[routes] \*/~~g" "$ServerRouteConstructor"
 
-        # Méthode améliorée pour insérer les imports et routes sans caractères invisibles
-        # Lire le contenu des constructeurs et les formater proprement
-        IMPORT_CONTENT=$(cat "${ImportConstructor}" | tr -d '\r' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/  */ /g')
-        ACCOUNT_ROUTE_CONTENT=$(cat "${AccountRouteConstructor}" | tr -d '\r' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/  */ /g')
-        SERVER_ROUTE_CONTENT=$(cat "${ServerRouteConstructor}" | tr -d '\r' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/  */ /g')
-        
-        # Insérer le contenu proprement formaté
         sed -i \
-          -e "s~\/\* blueprint\/import \*\/~/* blueprint/import */${IMPORT_CONTENT}~g" \
-          -e "s~\/\* routes\/account \*\/~/* routes/account */${ACCOUNT_ROUTE_CONTENT}~g" \
-          -e "s~\/\* routes\/server \*\/~/* routes/server */${SERVER_ROUTE_CONTENT}~g" \
+          -e "s~\/\* blueprint\/import \*\/~/* blueprint/import */""$(tr '\n' '\001' <"${ImportConstructor}")""~g" \
+          -e "s~\/\* routes/account \*\/~/* routes/account */""$(tr '\n' '\001' <"${AccountRouteConstructor}")""~g" \
+          -e "s~\/\* routes/server \*\/~/* routes/server */""$(tr '\n' '\001' <"${ServerRouteConstructor}")""~g" \
           "resources/scripts/blueprint/extends/routers/routes.ts"
-        
-        # Nettoyer les espaces multiples et s'assurer que les commentaires sont bien fermés
-        sed -i \
-          -e 's/  */ /g' \
-          -e 's~/\* blueprint/import \*/ */~/* blueprint/import */~g' \
-          -e 's~/\* routes/account \*/ */~/* routes/account */~g' \
-          -e 's~/\* routes/server \*/ */~/* routes/server */~g' \
-          "resources/scripts/blueprint/extends/routers/routes.ts"
+
+        # Fix line breaks by removing all of them.
+        sed -i -E "s~~~g" "resources/scripts/blueprint/extends/routers/routes.ts"
 
         rm \
           "$ImportConstructor" \
