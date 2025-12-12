@@ -179,7 +179,7 @@ export default ({ server, className }: { server: Server; className?: string }) =
                             </div>
                             <p css={tw`text-xs text-neutral-600 text-center mt-1`}>of {diskLimit}</p>
                         </div>
-                        <ResourceLimits server={server}/>
+                        <ResourceLimits arg={server}/>
                     </React.Fragment>
                 )}
             </div>
