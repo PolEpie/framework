@@ -1,0 +1,53 @@
+name: Zip & Upload on Release Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  zip-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build zip (no top-level directory)
+        run: |
+          set -euo pipefail
+          ZIP_NAME="${GITHUB_REPOSITORY##*/}-${GITHUB_REF_NAME}.zip"
+
+          # Create zip from repo root contents, excluding .git and common CI artifacts.
+          # The "-j" flag is NOT used (it would flatten paths). We want normal paths,
+          # just without an extra enclosing folder.
+          zip -r "$ZIP_NAME" . \
+            -x ".git/*" ".git/**" \
+               ".github/*" ".github/**" \
+               "**/.DS_Store" \
+               "node_modules/*" "node_modules/**" \
+               ".idea/*" ".idea/**" \
+               "*.zip"
+
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+
+      - name: Ensure release exists for this tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Create the release if it doesn't exist
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 || \
+            gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --notes ""
+
+      - name: Upload zip to release (overwrite if exists)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release upload "${GITHUB_REF_NAME}" "${ZIP_NAME}" --clobber
